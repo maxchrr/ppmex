@@ -1,15 +1,17 @@
 // Pixel definition
 struct Pixel {
 	unsigned char r;
-	unsigned char v;
+	unsigned char g;
 	unsigned char b;
 };
-typedef struct Pixel pixel;
+typedef struct Pixel Px;
 
 // Picture definitiion
 struct Picture {
-	Pixel** pixels;
+	Px** pixels;
 	int sizeX;
 	int sizeY;
 };
-typedef struct Picture picture;
+typedef struct Picture Pic;
+
+int saveAsFile(const Pic* pic, const char* filename);
