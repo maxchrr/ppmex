@@ -5,6 +5,28 @@
 
 #include "lib.h"
 
+Pic* createPicture(int width, int height) {
+	Pic* pic = malloc(sizeof *pic);
+	pic->sizeX = width;
+	pic->sizeY = height;
+	pic->pixels = calloc(height, sizeof(Px*));
+
+	for (int i=0; i<height; ++i) {
+		pic->pixels[i] = calloc(width, sizeof(Px));
+	}
+
+	return pic;
+}
+
+int freePicture(Pic* pic) {
+	for (int i=0; i<pic->sizeY; ++i) free(pic->pixels[i]);
+	free(pic->pixels);
+	free(pic);
+	return 0;
+}
+
+
+
 Pic loadAsPic(const char* filename) {
 	Pic pic = {NULL, 0, 0};
 	int max_color;
