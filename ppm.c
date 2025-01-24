@@ -3,7 +3,7 @@
 #include <string.h>
 #include <math.h>
 
-#include "lib.h"
+#include "ppm.h"
 
 Pic* createPicture(int width, int height) {
 	Pic* pic = malloc(sizeof *pic);

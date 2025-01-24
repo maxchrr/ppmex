@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "lib.h"
+#include "ppm.h"
 
 int main(int argc, char** argv) {
 	/*int width = 256;
