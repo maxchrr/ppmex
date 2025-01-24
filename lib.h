@@ -20,12 +20,11 @@ typedef struct Picture Pic;
 
 Pic* createPicture(int width, int height);
 int freePicture(Pic* pic);
-
-Pic loadAsPic(const char* filename);
-int saveAsFile(const Pic* pic, const char* filename);
-int transformRed(const Pic* pic);
-int transformGreen(const Pic* pic);
-int transformBlue(const Pic* pic);
-int transformGrayscale(const Pic* pic);
-int transformGrayscaleAlt(const Pic* pic);
-int transformSepia(const Pic* pic);
+Pic* loadPicture(const char* filename);
+int savePicture(const char* filename, Pic* pic);
+int transformRed(Pic* pic);
+int transformGreen(Pic* pic);
+int transformBlue(Pic* pic);
+int transformGrayscaleAvg(Pic* pic);
+int transformGrayscaleMax(Pic* pic);
+int transformSepia(Pic* pic);

@@ -25,16 +25,11 @@ int freePicture(Pic* pic) {
 	return 0;
 }
 
-
-
-Pic loadAsPic(const char* filename) {
-	Pic pic = {NULL, 0, 0};
-	int max_color;
-
+Pic* loadPicture(const char* filename) {
 	FILE* file = fopen(filename, "r");
 	if (file == NULL) {
 		perror("Unable to read file");
-		return pic;
+		return NULL;
 	}
 
 	// read PPM header
@@ -43,20 +38,25 @@ Pic loadAsPic(const char* filename) {
 	if (strcmp(format, "P3") != 0) {
 		printf("Invalid file format");
 		fclose(file);
-		return pic;
+		return NULL;
 	}
-	fscanf(file, "%d %d", &pic.sizeX, &pic.sizeY);
+	int width, height;
+	fscanf(file, "%d %d", &width, &height);
+	int max_color;
 	fscanf(file, "%d", &max_color);
 
-	pic.pixels = malloc(pic.sizeY * sizeof(Px*));
-	for (int i=0; i<pic.sizeY; ++i) {
-		pic.pixels[i] = malloc(pic.sizeX * sizeof(Px));
-	}
+	Pic* pic = createPicture(width, height);
 
-	// read RGB triplets
-	for (int y=0; y<pic.sizeY; ++y) {
-		for (int x=0; x<pic.sizeX; ++x) {
-			fscanf(file, "%hhu %hhu %hhu ", &pic.pixels[y][x].r, &pic.pixels[y][x].g, &pic.pixels[y][x].b);
+	// read RGB components
+	for (int y=0; y<height; ++y) {
+		for (int x=0; x<width; ++x) {
+			fscanf(
+				file,
+				"%hhu %hhu %hhu ",
+				&pic->pixels[y][x].r,
+				&pic->pixels[y][x].g,
+				&pic->pixels[y][x].b
+			);
 		}
 	}
 
@@ -64,7 +64,7 @@ Pic loadAsPic(const char* filename) {
 	return pic;
 }
 
-int saveAsFile(const Pic* pic, const char* filename) {
+int savePicture(const char* filename, Pic* pic) {
 	FILE* file = fopen(filename, "w");
 	if (file == NULL) {
 		perror("Unable to write file");
@@ -76,11 +76,16 @@ int saveAsFile(const Pic* pic, const char* filename) {
 	fprintf(file, "%d %d\n", pic->sizeX, pic->sizeY);
 	fprintf(file, "255\n");
 
-	// write RGB triplets
+	// write RGB components
 	for (int y=0; y<pic->sizeY; ++y) {
 		for (int x=0; x<pic->sizeX; ++x) {
-			Px p = pic->pixels[y][x];
-			fprintf(file, "%d %d %d ", p.r, p.g, p.b);
+			fprintf(
+				file,
+				"%d %d %d  ",
+				pic->pixels[y][x].r,
+				pic->pixels[y][x].g,
+				pic->pixels[y][x].b
+			);
 		}
 		fprintf(file, "\n");
 	}
@@ -89,59 +94,91 @@ int saveAsFile(const Pic* pic, const char* filename) {
 	return 0;
 }
 
-int transformRed(const Pic* pic) {
+int transformRed(Pic* pic) {
 	for (int y=0; y<pic->sizeY; ++y) {
 		for (int x=0; x<pic->sizeX; ++x) {
-			pic->pixels[y][x].g = pic->pixels[y][x].b = 0;
+			pic->pixels[y][x].g = 0;
+			pic->pixels[y][x].b = 0;
 		}
 	}
 	return 0;
 }
 
-int transformGreen(const Pic* pic) {
+int transformGreen(Pic* pic) {
 	for (int y=0; y<pic->sizeY; ++y) {
 		for (int x=0; x<pic->sizeX; ++x) {
-			pic->pixels[y][x].r = pic->pixels[y][x].b = 0;
+			pic->pixels[y][x].r = 0;
+			pic->pixels[y][x].b = 0;
 		}
 	}
 	return 0;
 }
 
-int transformBlue(const Pic* pic) {
+int transformBlue(Pic* pic) {
 	for (int y=0; y<pic->sizeY; ++y) {
 		for (int x=0; x<pic->sizeX; ++x) {
-			pic->pixels[y][x].r = pic->pixels[y][x].g = 0;
+			pic->pixels[y][x].r = 0;
+			pic->pixels[y][x].g = 0;
 		}
 	}
 	return 0;
 }
 
-int transformGrayscale(const Pic* pic) {
+int transformGrayscaleAvg(Pic* pic) {
 	for (int y=0; y<pic->sizeY; ++y) {
 		for (int x=0; x<pic->sizeX; ++x) {
-			int sum = pic->pixels[y][x].r + pic->pixels[y][x].g + pic->pixels[y][x].b;
-			pic->pixels[y][x].r = pic->pixels[y][x].g = pic->pixels[y][x].b = sum/3;
+			unsigned char avg = (
+				pic->pixels[y][x].r +
+				pic->pixels[y][x].g +
+				pic->pixels[y][x].b
+			) / 3;
+			pic->pixels[y][x].r = avg;
+			pic->pixels[y][x].g = avg;
+			pic->pixels[y][x].b = avg;
 		}
 	}
 	return 0;
 }
 
-int transformGrayscaleAlt(const Pic* pic) {
+int transformGrayscaleMax(Pic* pic) {
 	for (int y=0; y<pic->sizeY; ++y) {
 		for (int x=0; x<pic->sizeX; ++x) {
-			double max = fmax(fmax(pic->pixels[y][x].r,pic->pixels[y][x].g),pic->pixels[y][x].b);
-			pic->pixels[y][x].r = pic->pixels[y][x].g = pic->pixels[y][x].b = max;
+			unsigned char max =
+				fmax(
+					fmax(pic->pixels[y][x].r, pic->pixels[y][x].g),
+					pic->pixels[y][x].b
+				);
+			pic->pixels[y][x].r = max;
+			pic->pixels[y][x].g = max;
+			pic->pixels[y][x].b = max;
 		}
 	}
 	return 0;
 }
 
-int transformSepia(const Pic* pic) {
+int transformSepia(Pic* pic) {
 	for (int y=0; y<pic->sizeY; ++y) {
 		for (int x=0; x<pic->sizeX; ++x) {
-			pic->pixels[y][x].r = 0.393*pic->pixels[y][x].r + 0.769*pic->pixels[y][x].g + 0.189*pic->pixels[y][x].b;
-			pic->pixels[y][x].g = 0.349*pic->pixels[y][x].r + 0.686*pic->pixels[y][x].g + 0.168*pic->pixels[y][x].b;
-			pic->pixels[y][x].b = 0.272*pic->pixels[y][x].r + 0.534*pic->pixels[y][x].g + 0.131*pic->pixels[y][x].b;
+			unsigned char originalR = pic->pixels[y][x].r;
+			unsigned char originalG = pic->pixels[y][x].g;
+			unsigned char originalB = pic->pixels[y][x].b;
+
+			unsigned char newR =
+				0.393*originalR +
+				0.769*originalG +
+				0.189*originalB;
+			unsigned char newG =
+				0.349*originalR +
+				0.686*originalG +
+				0.168*originalB;
+			unsigned char newB =
+				0.272*originalR +
+				0.534*originalG +
+				0.131*originalB;
+
+			pic->pixels[y][x].r = (newR > 255) ? 255 : newR;
+			pic->pixels[y][x].g = (newG > 255) ? 255 : newG;
+			pic->pixels[y][x].b = (newR > 255) ? 255 : newB;
 		}
 	}
 	return 0;
