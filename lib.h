@@ -15,3 +15,4 @@ struct Picture {
 typedef struct Picture Pic;
 
 int saveAsFile(const Pic* pic, const char* filename);
+Pic loadAsPic(const char* filename);
