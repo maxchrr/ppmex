@@ -19,7 +19,8 @@ Pic* createPicture(int width, int height) {
 }
 
 int freePicture(Pic* pic) {
-	for (int i=0; i<pic->sizeY; ++i) free(pic->pixels[i]);
+	for (int i=0; i<pic->sizeY; ++i)
+		free(pic->pixels[i]);
 	free(pic->pixels);
 	free(pic);
 	return 0;
@@ -163,6 +164,7 @@ int transformSepia(Pic* pic) {
 			unsigned char originalG = pic->pixels[y][x].g;
 			unsigned char originalB = pic->pixels[y][x].b;
 
+			// these values are very weird...
 			unsigned char newR =
 				0.393*originalR +
 				0.769*originalG +
@@ -184,23 +186,25 @@ int transformSepia(Pic* pic) {
 	return 0;
 }
 
-Px avg(Pic* pic, int x, int y) {
+Px avg3x3Matrix(Pic* pic, int x, int y) {
 	int totalR = 0;
 	int totalG = 0;
 	int totalB = 0;
 	int count = 0;
 
+	// 3x3 matrix
 	for (int i=-1; i<=1; i++) {
 		for (int j=-1; j<=1; j++) {
 			int nx = x+i;
 			int ny = y+j;
 
+			// check for out of picture bounds
 			if (nx >= 0 && nx < pic->sizeX && ny >= 0 && ny < pic->sizeY) {
 				Px p = pic->pixels[ny][nx];
 				totalR += p.r;
 				totalG += p.g;
 				totalB += p.b;
-				count++;
+				++count;
 			} /*else {
 				printf(
 					"WARNING: Index out of bounds (nx, ny) = (%d, %d)\n",
@@ -219,6 +223,7 @@ Px avg(Pic* pic, int x, int y) {
 }
 
 int transformBlur(Pic* pic) {
+	// picture copy
 	Px** copy = calloc(pic->sizeY, sizeof(Px*));
 	for (int i=0; i<pic->sizeY; ++i) {
 		copy[i] = calloc(pic->sizeX, sizeof(Px));
@@ -226,7 +231,7 @@ int transformBlur(Pic* pic) {
 
 	for (int y=0; y<pic->sizeY; ++y) {
 		for (int x=0; x<pic->sizeX; ++x) {
-			copy[y][x] = avg(pic, x, y);
+			copy[y][x] = avg3x3Matrix(pic, x, y);
 		}
 	}
 
@@ -236,7 +241,8 @@ int transformBlur(Pic* pic) {
 		}
 	}
 
-	for (int i=0; i<pic->sizeY; ++i) free(copy[i]);
+	for (int i=0; i<pic->sizeY; ++i)
+		free(copy[i]);
 	free(copy);
 	return 0;
 }
