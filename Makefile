@@ -13,4 +13,4 @@ libppm.so: ppm.c
 	$(CC) -o $@ $(CFLAGS) -fpic -shared $^
 
 clean:
-	@rm -rf bin *.so
+	@rm -rf bin *.so*

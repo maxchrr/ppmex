@@ -183,3 +183,60 @@ int transformSepia(Pic* pic) {
 	}
 	return 0;
 }
+
+Px avg(Pic* pic, int x, int y) {
+	int totalR = 0;
+	int totalG = 0;
+	int totalB = 0;
+	int count = 0;
+
+	for (int i=-1; i<=1; i++) {
+		for (int j=-1; j<=1; j++) {
+			int nx = x+i;
+			int ny = y+j;
+
+			if (nx >= 0 && nx < pic->sizeX && ny >= 0 && ny < pic->sizeY) {
+				Px p = pic->pixels[ny][nx];
+				totalR += p.r;
+				totalG += p.g;
+				totalB += p.b;
+				count++;
+			} /*else {
+				printf(
+					"WARNING: Index out of bounds (nx, ny) = (%d, %d)\n",
+					nx,
+					ny
+				);
+			}*/
+		}
+	}
+
+	Px res;
+	res.r = totalR/count;
+	res.g = totalG/count;
+	res.b = totalB/count;
+	return res;
+}
+
+int transformBlur(Pic* pic) {
+	Px** copy = calloc(pic->sizeY, sizeof(Px*));
+	for (int i=0; i<pic->sizeY; ++i) {
+		copy[i] = calloc(pic->sizeX, sizeof(Px));
+	}
+
+	for (int y=0; y<pic->sizeY; ++y) {
+		for (int x=0; x<pic->sizeX; ++x) {
+			copy[y][x] = avg(pic, x, y);
+		}
+	}
+
+	for (int y=0; y<pic->sizeY; ++y) {
+		for (int x=0; x<pic->sizeX; ++x) {
+			pic->pixels[y][x] = copy[y][x];
+		}
+	}
+
+	for (int i=0; i<pic->sizeY; ++i) free(copy[i]);
+	free(copy);
+	return 0;
+}

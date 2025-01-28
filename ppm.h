@@ -28,3 +28,4 @@ int transformBlue(Pic* pic);
 int transformGrayscaleAvg(Pic* pic);
 int transformGrayscaleMax(Pic* pic);
 int transformSepia(Pic* pic);
+int transformBlur(Pic *pic);
