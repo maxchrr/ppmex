@@ -4,9 +4,18 @@
 
 #include "ppm.h"
 
-int main(int argc, char** argv) {
-	/*int width = 940;
-	int height = 3;
+int main(int argc, char* argv[]) {
+	int width, height;
+
+	if (argc == 3) {
+		width = strtol(argv[1], NULL, 10);;
+		height = strtol(argv[2], NULL, 10);;
+	}
+	else {
+		width = 8;
+		height = 8;
+	}
+
 	Pic* pic = createPicture(width, height);
 
 	srand(time(NULL));
@@ -18,15 +27,8 @@ int main(int argc, char** argv) {
 		}
 	}
 
-	savePicture("random.ppm", pic);*/
+	savePicture("random.ppm", pic);
 
-	Pic* npic = loadPicture("bclc.ppm");
-
-	transformBlue(npic);
-
-	savePicture("bclc_blue.ppm", npic);
-
-	//freePicture(pic);
-	freePicture(npic);
-	return 0;
+	freePicture(pic);
+	return EXIT_SUCCESS;
 }
