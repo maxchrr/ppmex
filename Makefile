@@ -1,16 +1,19 @@
-CC=clang
-CFLAGS=-O3 -g -Wall -pedantic -std=c99
+CC = clang
+CFLAGS = -Wall -Wextra -pedantic -std=c99 -I.
 
-.PHONY: all ppmex libppm.so clean
+SRC = ppm.c main.c
+OBJ = $(SRC:.c=.so)
+EXEC = ppmex
 
-all: ppmex
+all: $(EXEC)
 
-ppmex: main.c libppm.so
-	mkdir -p bin
-	$(CC) -o bin/$@ $(CFLAGS) -lppm -L. main.c
+$(EXEC): $(SRC)
+	$(CC) -o $@ $^
 
-libppm.so: ppm.c
-	$(CC) -o $@ $(CFLAGS) -fpic -shared $^
+%.so: $(SRC)
+	$(CC) $(CFLAGS) -fpic -shared -c $< -o $@
 
 clean:
-	@rm -rf bin *.so*
+	@rm -f *.so $(EXEC)
+
+.PHONY: all clean
